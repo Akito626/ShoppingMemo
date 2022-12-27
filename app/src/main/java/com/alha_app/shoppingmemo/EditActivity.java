@@ -44,17 +44,11 @@ public class EditActivity extends AppCompatActivity {
     private Spinner spinner;
 
     // 作成したコンポーネントへのアクセス用
-    private LinearLayout[] layouts = new LinearLayout[20];
-    private EditText[] editTexts = new EditText[20];
-    private deleteButtonListener[] dbListener = new deleteButtonListener[20];
-    private TextView[] currencyTexts = new TextView[20];
-
-    /*
-    private ArrayList<LinearLayout> layouts = new ArrayList<LinearLayout>();
-    private ArrayList<EditText> editTexts = new ArrayList<EditText>();
-    private ArrayList<deleteButtonListener> dpListener = new ArrayList<deleteButtonListener>();
-    private ArrayList<TextView> currencyTexts = new ArrayList<TextView>();
-    */
+    private LinearLayout[] layouts;
+    private EditText[] names;
+    private EditText[] prices;
+    private deleteButtonListener[] dbListener;
+    private TextView[] currencyTexts;
 
     private int currentNum = 0;     // 現在のレイアウトの数を記録
     private final int maxBox = 20;      // 作成できるレイアウトの最大数
@@ -94,6 +88,13 @@ public class EditActivity extends AppCompatActivity {
         };
 
         spinner.setOnItemSelectedListener(selectListener);
+
+        // 最大数まで作成
+        layouts = new LinearLayout[maxBox];
+        names = new EditText[maxBox];
+        prices = new EditText[maxBox];
+        dbListener = new deleteButtonListener[maxBox];
+        currencyTexts = new TextView[maxBox];
 
         //コンポーネントの取得
         mainLayout = findViewById(R.id.main_layout);
@@ -154,7 +155,8 @@ public class EditActivity extends AppCompatActivity {
             mainLayout.removeView(layouts[id]);
             for(int i = id; i < currentNum - 1; i++){
                 layouts[i] = layouts[i+1];
-                editTexts[i] = editTexts[i+1];
+                names[i] = names[i+1];
+                prices[i] = prices[i+1];
                 dbListener[i] = dbListener[i+1];
                 dbListener[i].id--;
                 currencyTexts[i] = currencyTexts[i+1];
@@ -204,16 +206,16 @@ public class EditActivity extends AppCompatActivity {
 
         //内部の部品
         ImageButton deletebutton = new ImageButton(this);
-        EditText name = new EditText(this);     // 名前用
-        editTexts[currentNum] = new EditText(this);     // 数字用
+        names[currentNum] = new EditText(this);     // 名前用
+        prices[currentNum] = new EditText(this);     // 数字用
         currencyTexts[currentNum] = new TextView(this);     // 単位
 
-        editTexts[currentNum].setInputType(2);      // 数字のみに制限
+        prices[currentNum].setInputType(2);      // 数字のみに制限
 
         // 最大文字数の設定
         InputFilter[] filters = new InputFilter[1];
         filters[0] = new InputFilter.LengthFilter(7);
-        editTexts[currentNum].setFilters(filters);
+        prices[currentNum].setFilters(filters);
 
         //コンポーネントの大きさ設定
         LinearLayout.LayoutParams dbuttonlp = new LinearLayout.LayoutParams(
@@ -241,16 +243,16 @@ public class EditActivity extends AppCompatActivity {
         deletebutton.setImageResource(R.drawable.cross);
         deletebutton.setOnClickListener(dbListener[currentNum]);
 
-        name.setAutoSizeTextTypeWithDefaults(TextView.AUTO_SIZE_TEXT_TYPE_UNIFORM);
-        editTexts[currentNum].setAutoSizeTextTypeWithDefaults(TextView.AUTO_SIZE_TEXT_TYPE_UNIFORM);
+        names[currentNum].setAutoSizeTextTypeWithDefaults(TextView.AUTO_SIZE_TEXT_TYPE_UNIFORM);
+        prices[currentNum].setAutoSizeTextTypeWithDefaults(TextView.AUTO_SIZE_TEXT_TYPE_UNIFORM);
         currencyTexts[currentNum].setText(spinner.getSelectedItem().toString());
         currencyTexts[currentNum].setAutoSizeTextTypeWithDefaults(TextView.AUTO_SIZE_TEXT_TYPE_UNIFORM);
         currencyTexts[currentNum].setGravity(Gravity.RIGHT);
 
         // レイアウトに追加
         layouts[currentNum].addView(deletebutton, dbuttonlp);
-        layouts[currentNum].addView(name, namelp);
-        layouts[currentNum].addView(editTexts[currentNum], numlp);
+        layouts[currentNum].addView(names[currentNum], namelp);
+        layouts[currentNum].addView(prices[currentNum], numlp);
         layouts[currentNum].addView(currencyTexts[currentNum], 2, textlp);
 
         mainLayout.addView(layouts[currentNum]);
@@ -293,7 +295,7 @@ public class EditActivity extends AppCompatActivity {
         SpannableStringBuilder sb;
         boolean isint;
         for (int i = 0; i < currentNum; i++) {
-            sb = (SpannableStringBuilder) editTexts[i].getText();
+            sb = (SpannableStringBuilder) prices[i].getText();
             isint = checkString(sb.toString());
             if(isint){
                 total += Integer.parseInt(sb.toString());
@@ -325,7 +327,15 @@ public class EditActivity extends AppCompatActivity {
         editText.setText("");
     }
 
-    public void save(){
+    public void loadFile(){
+        String savePath = this.getFilesDir().getPath().toString();
+        File[] files = new File(savePath).listFiles();
+    }
+
+    public void saveFile(){
+        EditText editText = findViewById(R.id.titleText);
+        String title = editText.getText().toString();
+
 
     }
 }
