@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">ShoppingMemo</string>
+
+    <string name="action_add">追加</string>
+    <string name="action_delete">削除</string>
+    <string name="action_save">セーブ</string>
+
+    <string name="editactivity_title">編集</string>
+
+    <string name="checkmessage">本当に削除しますか？</string>
+
+    <string name="msg_destruction">メモを破棄しました。</string>
+
+    <string-array name="list">
+        <item>￥</item>
+        <item>＄</item>
+        <item>￡</item>
+        <item>€</item>
+    </string-array>
+</resources>
