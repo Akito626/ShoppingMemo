@@ -32,8 +32,7 @@ public class CheckDialog extends DialogFragment {
     private void RemoveAll(){
         EditActivity editActivity = (EditActivity) getActivity();
         if(editActivity != null){
-            editActivity.removeAll();
-            editActivity.CreateViews();
+            editActivity.removeFile();
         }
     }
 }
