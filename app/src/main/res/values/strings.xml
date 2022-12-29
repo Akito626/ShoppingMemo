@@ -8,6 +8,8 @@
     <string name="editactivity_title">編集</string>
 
     <string name="checkmessage">本当に削除しますか？</string>
+    <string name="nospacemessage">容量がいっぱいです。\nファイルを削除してください。</string>
+    <string name="removeallmessage">削除すると二度と戻せません。\n本当に削除しますか？</string>
 
     <string name="msg_destruction">メモを破棄しました。</string>
 
