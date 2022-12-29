@@ -26,6 +26,9 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.DialogFragment;
+import androidx.room.util.StringUtil;
+
+import org.apache.commons.lang.StringUtils;
 
 import java.io.File;
 import java.io.OutputStream;
@@ -120,6 +123,7 @@ public class EditActivity extends AppCompatActivity {
 
         switch (item.getItemId()) {
             case android.R.id.home:
+                saveFile();
                 finish();
                 break;
             case R.id.action_delete:
@@ -215,7 +219,6 @@ public class EditActivity extends AppCompatActivity {
         prices[currentNum] = new EditText(this);     // 数字用
         currencyTexts[currentNum] = new TextView(this);     // 単位
 
-
         names[currentNum].setId(currentNum);
         prices[currentNum].setInputType(2);      // 数字のみに制限
 
@@ -310,15 +313,6 @@ public class EditActivity extends AppCompatActivity {
         return res;
     }
 
-    public void removeAll(){
-        EditText editText = findViewById(R.id.titleText);
-
-        isfirst = true;
-        mainLayout.removeAllViews();
-        currentNum = 0;
-        editText.setText("");
-    }
-
     public void saveFile(){
         // [削除] で画面を閉じるときは、保存しない
         if (mNotSave) {
@@ -336,16 +330,9 @@ public class EditActivity extends AppCompatActivity {
             sprices[i] = prices[i].getText().toString();
         }
 
-        // タイトル、内容が空白の場合、保存しない
-        if (title.isEmpty()) {
-                Toast.makeText(this, R.string.msg_destruction, Toast.LENGTH_SHORT).show();
-                return;
-        }
-
         // ファイル名を生成  ファイル名 ： yyyyMMdd_HHmmssSSS.txt
         // （既に保存されているファイルは、そのままのファイル名とする）
         if (mFileName.isEmpty()) {
-            System.out.println("名前を生成");
             Date date = new Date(System.currentTimeMillis());
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmssSSS", Locale.JAPAN);
             mFileName = sdf.format(date) + ".txt";
@@ -371,6 +358,7 @@ public class EditActivity extends AppCompatActivity {
         }
     }
 
+    // ファイルを保存せずに削除
     public void removeFile(){
         if (!mFileName.isEmpty()) {
             this.deleteFile(mFileName);

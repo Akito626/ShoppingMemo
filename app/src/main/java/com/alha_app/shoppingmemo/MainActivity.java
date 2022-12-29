@@ -2,6 +2,7 @@ package com.alha_app.shoppingmemo;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.DialogFragment;
 import androidx.room.Room;
 
 import android.content.Context;
@@ -52,18 +53,24 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_add:
+                String savePath = this.getFilesDir().getPath().toString();
+                File file = new File(savePath);
+                if(file.getFreeSpace() < 1000000000l){  // 容量が一定以下なら作成できない
+                    DialogFragment dialogFragment = new NoSpaceDialog();
+                    dialogFragment.show(getSupportFragmentManager(), "my_dialog");
+                    break;
+                }
                 Intent intent = new Intent(MainActivity.this, EditActivity.class);
                 startActivity(intent);
+                break;
+            case R.id.action_delete:
+                DialogFragment dialogFragment = new RemoveFileDialog();
+                dialogFragment.show(getSupportFragmentManager(), "my_dialog");
                 break;
             default:
                 break;
         }
         return true;
-    }
-
-    @Override
-    public void onPause(){
-        super.onPause();
     }
 
     @Override
@@ -100,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
       }
 
-        String message = "「" + item.getTitle() + "」が押されました。";
+        String message = "ファイルを削除しました";
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
         return true;
     }
@@ -109,6 +116,7 @@ public class MainActivity extends AppCompatActivity {
         // アプリの保存フォルダ内のファイル一覧を取得
         String savePath = this.getFilesDir().getPath().toString();
         File[] files = new File(savePath).listFiles();
+
         // ファイル名の降順でソート
         Arrays.sort (files, Collections.reverseOrder());
 
@@ -194,5 +202,18 @@ public class MainActivity extends AppCompatActivity {
         mAdapter.notifyDataSetChanged();
     }
 
+    public void removeallFiles(){
+        // アプリの保存フォルダ内のファイル一覧を取得
+        String savePath = this.getFilesDir().getPath().toString();
+        File[] files = new File(savePath).listFiles();
 
+        for(int i = 0; i < files.length; i++){
+            // ファイル削除
+            this.deleteFile(files[i].getName());
+            // リストからアイテム処理
+        }
+        listData.removeAll(listData);
+        // ListView のデータ変更を表示に反映
+        mAdapter.notifyDataSetChanged();
+    }
 }
