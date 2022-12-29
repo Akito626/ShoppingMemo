@@ -81,9 +81,7 @@ public class MainActivity extends AppCompatActivity {
         File[] files = new File(savePath).listFiles();
         // ファイル名の降順でソート
         Arrays.sort (files, Collections.reverseOrder());
-        // テキストファイル(*.txt)を取得し、ListView用アダプタのリストにセット
 
-        System.out.println(savePath);
         ArrayList<String> title = new ArrayList<String>();
         ArrayList<ArrayList<String>> name = new ArrayList<ArrayList<String>>();
         ArrayList<ArrayList<String>> price = new ArrayList<ArrayList<String>>();
@@ -108,10 +106,8 @@ public class MainActivity extends AppCompatActivity {
                     String str = null;
                     for(int j = 0;; j++){
                         if((str = reader.readLine()) == null) break;
-                        System.out.println(str);
                         nlist.add(str);
                         if((str = reader.readLine()) == null) break;
-                        System.out.println(str);
                         plist.add(str);
                     }
                     name.add(nlist);
