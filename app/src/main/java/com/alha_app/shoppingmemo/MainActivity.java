@@ -33,6 +33,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
+    private ArrayList<Map<String, String>> listData;
+    private SimpleAdapter mAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,15 +78,40 @@ public class MainActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.main_context, menu);
     }
 
+    @Override
+    public boolean onContextItemSelected(@NonNull MenuItem item) {
+        // アプリの保存フォルダ内のファイル一覧を取得
+        String savePath = this.getFilesDir().getPath().toString();
+        File[] files = new File(savePath).listFiles();
+        // ファイル名の降順でソート
+        Arrays.sort (files, Collections.reverseOrder());
+
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
+
+        System.out.println(listData.get(info.position).get("filename"));
+        switch (item.getItemId()) {
+            case R.id.context_del:
+                // ファイル削除
+                this.deleteFile(files[info.position].getName());
+                // リストからアイテム処理
+                listData.remove(info.position);
+                // ListView のデータ変更を表示に反映
+                mAdapter.notifyDataSetChanged();
+                break;
+      }
+
+        String message = "「" + item.getTitle() + "」が押されました。";
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        return true;
+    }
+
     public void loadFile(){
         // アプリの保存フォルダ内のファイル一覧を取得
         String savePath = this.getFilesDir().getPath().toString();
         File[] files = new File(savePath).listFiles();
         // ファイル名の降順でソート
         Arrays.sort (files, Collections.reverseOrder());
-        // テキストファイル(*.txt)を取得し、ListView用アダプタのリストにセット
 
-        System.out.println(savePath);
         ArrayList<String> title = new ArrayList<String>();
         ArrayList<ArrayList<String>> name = new ArrayList<ArrayList<String>>();
         ArrayList<ArrayList<String>> price = new ArrayList<ArrayList<String>>();
@@ -108,10 +136,8 @@ public class MainActivity extends AppCompatActivity {
                     String str = null;
                     for(int j = 0;; j++){
                         if((str = reader.readLine()) == null) break;
-                        System.out.println(str);
                         nlist.add(str);
                         if((str = reader.readLine()) == null) break;
-                        System.out.println(str);
                         plist.add(str);
                     }
                     name.add(nlist);
@@ -125,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        ArrayList<Map<String, String>> listData = new ArrayList<>();
+        listData = new ArrayList<>();
         for (int i = 0; i < files.length; i++) {
             Map<String, String> item = new HashMap<>();
             item.put("title", title.get(i));
@@ -134,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
             listData.add(item);
         }
 
-        SimpleAdapter mAdapter = new SimpleAdapter(
+        mAdapter = new SimpleAdapter(
                 this,
                 listData,
                 R.layout.list_item,
@@ -153,8 +179,12 @@ public class MainActivity extends AppCompatActivity {
                     AdapterView<?> parent, View view, int pos, long id) {
                 // 編集画面に渡すデータをセットし、表示
                 Intent intent = new Intent(MainActivity.this, EditActivity.class);
-                intent.putExtra("TITLE", listData.get(pos).get("title"));
-                intent.putExtra("CONTENT", listData.get(pos).get("content"));
+                System.out.println("書き込み：" + files[pos].getName());
+                intent.putExtra("filename", files[pos].getName());
+                intent.putExtra("size", String.valueOf(name.get(pos).size()));
+                intent.putExtra("title", title.get(pos));
+                intent.putStringArrayListExtra("name", name.get(pos));
+                intent.putStringArrayListExtra("price", price.get(pos));
                 startActivity(intent);
             }
         });

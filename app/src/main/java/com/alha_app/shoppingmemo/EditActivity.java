@@ -47,7 +47,6 @@ public class EditActivity extends AppCompatActivity {
     private Button calcButton;      // 計算ボタン
     private TextView totalView;
     private boolean isfirst = true;     // 最初か確認
-    private Spinner spinner;
 
     // 作成したコンポーネントへのアクセス用
     private LinearLayout[] layouts;
@@ -59,8 +58,6 @@ public class EditActivity extends AppCompatActivity {
     private int currentNum = 0;     // 現在のレイアウトの数を記録
     private final int maxBox = 20;      // 作成できるレイアウトの最大数
 
-    private final Locale[] currency = {Locale.JAPAN, Locale.US, Locale.UK, Locale.FRANCE};  // 通貨の設定
-
     private String mFileName = "";
     private boolean mNotSave = false;
 
@@ -71,32 +68,6 @@ public class EditActivity extends AppCompatActivity {
 
         ActionBar actionBar = getSupportActionBar();
         Objects.requireNonNull(actionBar).setDisplayHomeAsUpEnabled(true);
-
-        // スピナーの準備
-        spinner = findViewById(R.id.spinner);
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                this,
-                R.layout.custom_spinner,
-                getResources().getStringArray(R.array.list)
-        );
-        adapter.setDropDownViewResource(R.layout.custom_spinner_dropdown);
-        spinner.setAdapter(adapter);
-
-        AdapterView.OnItemSelectedListener selectListener = new AdapterView.OnItemSelectedListener(){
-            //　アイテムが選択された時
-            @Override
-            public void onItemSelected(AdapterView<?> parent,
-                                       View view, int position, long id) {
-                changeCurrencyText();
-            }
-
-            //　アイテムが選択されなかった時
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        };
-
-        spinner.setOnItemSelectedListener(selectListener);
 
         // 最大数まで作成
         layouts = new LinearLayout[maxBox];
@@ -110,7 +81,26 @@ public class EditActivity extends AppCompatActivity {
         totalView = findViewById(R.id.total);
         calcButton = findViewById(R.id.calcbutton);
 
-        CreateViews();
+        //MAINからの値を取得
+        Intent intent = getIntent();
+        // タイトルの取得
+        EditText editTitle = findViewById(R.id.titleText);
+        if(intent.getStringExtra("title") != null){
+            editTitle.setText(intent.getStringExtra("title"));
+            mFileName = intent.getStringExtra("filename");
+            int size = Integer.parseInt(intent.getStringExtra("size"));
+            String nstr[] = new String[size];
+            String pstr[] = new String[size];
+            intent.getStringArrayListExtra("name").toArray(nstr);
+            intent.getStringArrayListExtra("price").toArray(pstr);
+            for(int i = 0; i < size; i++) {
+                CreateViews();
+                names[i].setText(nstr[i]);
+                prices[i].setText(pstr[i]);
+            }
+        }else{
+            CreateViews();
+        }
     }
 
     @Override
@@ -262,7 +252,7 @@ public class EditActivity extends AppCompatActivity {
 
         names[currentNum].setAutoSizeTextTypeWithDefaults(TextView.AUTO_SIZE_TEXT_TYPE_UNIFORM);
         prices[currentNum].setAutoSizeTextTypeWithDefaults(TextView.AUTO_SIZE_TEXT_TYPE_UNIFORM);
-        currencyTexts[currentNum].setText(spinner.getSelectedItem().toString());
+        currencyTexts[currentNum].setText(R.string.current);
         currencyTexts[currentNum].setAutoSizeTextTypeWithDefaults(TextView.AUTO_SIZE_TEXT_TYPE_UNIFORM);
         currencyTexts[currentNum].setGravity(Gravity.RIGHT);
 
@@ -291,21 +281,6 @@ public class EditActivity extends AppCompatActivity {
         return nf.format(d);
     }
 
-    // 現在選択されている通貨を取得
-    public Locale nowCurrency(){
-        int num = 0;
-
-        num = spinner.getSelectedItemPosition();
-
-        return currency[num];
-    }
-
-    public void changeCurrencyText(){
-        for(int i = 0; i < currentNum; i++){
-            currencyTexts[i].setText(spinner.getSelectedItem().toString());
-        }
-    }
-
     // 値段計算
     public void Calc() {
         int total = 0;
@@ -321,7 +296,7 @@ public class EditActivity extends AppCompatActivity {
             }
         }
 
-        totalView.setText(printValue(total, nowCurrency()));
+        totalView.setText(printValue(total, Locale.JAPAN));
     }
 
     // テキストが数字か確認
@@ -351,7 +326,7 @@ public class EditActivity extends AppCompatActivity {
         }
 
         // タイトル、内容を取得
-        EditText editTitle = (EditText)findViewById(R.id.titleText);
+        EditText editTitle = findViewById(R.id.titleText);
         String title = editTitle.getText().toString();
         String contents[] = new String[maxBox];
         String sprices[] = new String[maxBox];
@@ -382,7 +357,6 @@ public class EditActivity extends AppCompatActivity {
         try{
             out = this.openFileOutput(mFileName, Context.MODE_PRIVATE);
             writer = new PrintWriter(new OutputStreamWriter(out,"UTF-8"));
-            System.out.println("書き込み中");
             // タイトル書き込み
             writer.println(title);
             // 内容書き込み
