@@ -11,6 +11,9 @@
 
     <string name="msg_destruction">メモを破棄しました。</string>
 
+    <string name="context_del">削除</string>
+    <string name="msg_del">削除しました。</string>
+
     <string-array name="list">
         <item>￥</item>
         <item>＄</item>

@@ -1,6 +1,7 @@
 package com.alha_app.shoppingmemo;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -27,9 +28,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.DialogFragment;
 
 import java.io.File;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Currency;
+import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.regex.Pattern;
@@ -54,6 +60,9 @@ public class EditActivity extends AppCompatActivity {
     private final int maxBox = 20;      // 作成できるレイアウトの最大数
 
     private final Locale[] currency = {Locale.JAPAN, Locale.US, Locale.UK, Locale.FRANCE};  // 通貨の設定
+
+    private String mFileName = "";
+    private boolean mNotSave = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,6 +111,12 @@ public class EditActivity extends AppCompatActivity {
         calcButton = findViewById(R.id.calcbutton);
 
         CreateViews();
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        saveFile();
     }
 
     @Override
@@ -210,6 +225,8 @@ public class EditActivity extends AppCompatActivity {
         prices[currentNum] = new EditText(this);     // 数字用
         currencyTexts[currentNum] = new TextView(this);     // 単位
 
+
+        names[currentNum].setId(currentNum);
         prices[currentNum].setInputType(2);      // 数字のみに制限
 
         // 最大文字数の設定
@@ -327,15 +344,65 @@ public class EditActivity extends AppCompatActivity {
         editText.setText("");
     }
 
-    public void loadFile(){
-        String savePath = this.getFilesDir().getPath().toString();
-        File[] files = new File(savePath).listFiles();
+    public void saveFile(){
+        // [削除] で画面を閉じるときは、保存しない
+        if (mNotSave) {
+            return;
+        }
+
+        // タイトル、内容を取得
+        EditText editTitle = (EditText)findViewById(R.id.titleText);
+        String title = editTitle.getText().toString();
+        String contents[] = new String[maxBox];
+        String sprices[] = new String[maxBox];
+
+        for(int i = 0; i < currentNum; i++){
+            contents[i] = names[i].getText().toString();
+            sprices[i] = prices[i].getText().toString();
+        }
+
+        // タイトル、内容が空白の場合、保存しない
+        if (title.isEmpty()) {
+                Toast.makeText(this, R.string.msg_destruction, Toast.LENGTH_SHORT).show();
+                return;
+        }
+
+        // ファイル名を生成  ファイル名 ： yyyyMMdd_HHmmssSSS.txt
+        // （既に保存されているファイルは、そのままのファイル名とする）
+        if (mFileName.isEmpty()) {
+            System.out.println("名前を生成");
+            Date date = new Date(System.currentTimeMillis());
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmssSSS", Locale.JAPAN);
+            mFileName = sdf.format(date) + ".txt";
+        }
+
+        // 保存
+        OutputStream out = null;
+        PrintWriter writer = null;
+        try{
+            out = this.openFileOutput(mFileName, Context.MODE_PRIVATE);
+            writer = new PrintWriter(new OutputStreamWriter(out,"UTF-8"));
+            System.out.println("書き込み中");
+            // タイトル書き込み
+            writer.println(title);
+            // 内容書き込み
+            for(int i = 0; i < currentNum; i++) {
+                writer.println(contents[i]);
+                writer.println(sprices[i]);
+            }
+            writer.close();
+            out.close();
+        }catch(Exception e){
+            Toast.makeText(this, "File save error!", Toast.LENGTH_LONG).show();
+        }
     }
 
-    public void saveFile(){
-        EditText editText = findViewById(R.id.titleText);
-        String title = editText.getText().toString();
-
-
+    public void removeFile(){
+        if (!mFileName.isEmpty()) {
+            this.deleteFile(mFileName);
+        }
+        // 保存せずに、画面を閉じる
+        mNotSave = true;
+        this.finish();
     }
 }
