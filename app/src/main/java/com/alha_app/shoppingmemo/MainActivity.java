@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -113,9 +114,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void loadFile(){
+        FilenameFilter filter = new FilenameFilter(){
+            public boolean accept(File file, String str){
+
+                //指定文字列でフィルタする
+                if(str.indexOf(".txt") != -1) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        };
+
         // アプリの保存フォルダ内のファイル一覧を取得
         String savePath = this.getFilesDir().getPath().toString();
-        File[] files = new File(savePath).listFiles();
+        File[] files = new File(savePath).listFiles(filter);
 
         // ファイル名の降順でソート
         Arrays.sort (files, Collections.reverseOrder());
@@ -126,7 +139,6 @@ public class MainActivity extends AppCompatActivity {
 
         for (int i=0; i<files.length; i++) {
             String fileName = files[i].getName();
-            if (files[i].isFile() && fileName.endsWith(".txt")) {
                 //　ファイルを読み込み
                 try {
                     // ファイルオープン
@@ -156,7 +168,6 @@ public class MainActivity extends AppCompatActivity {
                 } catch (Exception e) {
                     Toast.makeText(this, "File read error!", Toast.LENGTH_LONG).show();
                 }
-            }
         }
 
         listData = new ArrayList<>();
